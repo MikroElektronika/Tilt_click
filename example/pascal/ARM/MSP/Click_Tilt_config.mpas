@@ -1,0 +1,5 @@
+unit Click_Tilt_config;
+
+uses Click_Tilt_types;
+
+end.

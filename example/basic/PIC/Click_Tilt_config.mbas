@@ -1,0 +1,5 @@
+module Click_Tilt_config
+
+include Click_Tilt_types
+
+end.

@@ -1,0 +1,88 @@
+'
+'Example for Tilt Click
+'
+'    Date          : Feb 2019.
+'    Author        : Nenad Filipovic
+'
+'Test configuration AVR :
+'    
+'    MCU              : ATMEGA32
+'    Dev. Board       : EasyAVR v7 
+'    AVR Compiler ver : v7.0.1.0
+'
+'---
+'
+'Description :
+'
+'The application is composed of three sections :
+'
+'- System Initialization - Initializes GPIO, sets PWM and INT pins as input.
+'- Application Initialization - Initialization driver enable's - GPIO and start write log.
+'- Application Task - (code snippet) This is an example which demonstrates the use of Tilt Click board.
+'     Detect the movement's direction of RPI-1035 Surface Mount Type 4-Direction Detector on Tilt click board.
+'     Results are being sent to the Usart Terminal where you can track their changes.
+'     All data logs on usb uart when the movement's direction is changed.
+'
+'
+program Click_Tilt_AVR
+
+include Click_Tilt_types
+include Click_Tilt_config
+
+dim
+    tiltDirection as uint8_t 
+    tiltDirectionOld as uint8_t 
+    
+sub procedure systemInit() 
+
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_PWM_PIN, _GPIO_INPUT) 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_INT_PIN, _GPIO_INPUT) 
+    mikrobus_logInit(_LOG_USBUART, 9600) 
+    mikrobus_logWrite("-------------", _LOG_LINE) 
+    mikrobus_logWrite(" Tilt  Click ", _LOG_LINE) 
+    mikrobus_logWrite("-------------", _LOG_LINE) 
+    Delay_100ms() 
+
+end sub
+
+sub procedure applicationInit() 
+
+    tilt_gpioDriverInit(T_TILT_P(@_MIKROBUS1_GPIO)) 
+    Delay_100ms() 
+    mikrobus_logWrite(" Initialized ", _LOG_LINE) 
+    mikrobus_logWrite("-------------", _LOG_LINE) 
+
+end sub
+
+sub procedure applicationTask() 
+
+    tiltDirection = tilt_direction() 
+    if ((tiltDirectionOld <> tiltDirection)) then 
+        if ((tiltDirection = _TILT_LEFT_DETECTION)) then 
+            mikrobus_logWrite("    LEFT     ", _LOG_LINE) 
+        end if
+        if ((tiltDirection = _TILT_RIGHT_DETECTION)) then 
+            mikrobus_logWrite("    RIGHT    ", _LOG_LINE) 
+        end if
+        if ((tiltDirection = _TILT_UP_DETECTION)) then 
+            mikrobus_logWrite("     UP      ", _LOG_LINE) 
+        end if
+        if ((tiltDirection = _TILT_DOWN_DETECTION)) then 
+            mikrobus_logWrite("    DOWN     ", _LOG_LINE) 
+        end if
+        tiltDirectionOld = tiltDirection 
+        mikrobus_logWrite("-------------", _LOG_LINE) 
+    end if
+
+end sub
+
+main :
+    tiltDirectionOld = 0
+
+    systemInit() 
+    applicationInit() 
+    while (1) 
+        applicationTask() 
+    wend
+
+end.
